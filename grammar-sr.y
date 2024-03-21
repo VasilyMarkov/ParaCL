@@ -30,7 +30,7 @@ parser::token_type yylex(parser::semantic_type* yylval,
 }
 
 %token
-  EQUAL   "="
+  ASSIGN  "="
   PLUS    "+"
   MINUS   "-"
   MULT    "*"
@@ -38,7 +38,8 @@ parser::token_type yylex(parser::semantic_type* yylval,
   GRE     ">="
   LW      "<"
   LWE     "<="
-  NE      "!="
+  EQ      "!="
+  NEQ     "=="
   DIV     "/"
   LBRAC   "("
   RBRAC   ")"
@@ -76,7 +77,8 @@ expr:      expr PLUS term           { $$ = newArith(arith_t::PLUS, $1, $3);}
         |  expr GRE term            { $$ = newPred(pred_t::GRE, $1, $3);}  
         |  expr LW term             { $$ = newPred(pred_t::LW, $1, $3);}  
         |  expr LWE term            { $$ = newPred(pred_t::LWE, $1, $3);}  
-        |  expr NE term             { $$ = newPred(pred_t::NE, $1, $3);}  
+        |  expr EQ term             { $$ = newPred(pred_t::EQ, $1, $3);}  
+        |  expr NEQ term            { $$ = newPred(pred_t::NEQ, $1, $3);}  
         |  term                   
 ;
 

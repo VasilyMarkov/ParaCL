@@ -25,7 +25,8 @@ enum class pred_t{
     GRE,
     LW,
     LWE,
-    NE
+    EQ,
+    NEQ
 };
 
 class iNode {    
@@ -88,14 +89,16 @@ class predNode: public iNode {
         {pred_t::GRE, {[](int lhs, int rhs)-> int {return lhs >= rhs;}}},
         {pred_t::LW,  {[](int lhs, int rhs)-> int {return lhs < rhs;}}},
         {pred_t::LWE, {[](int lhs, int rhs)-> int {return lhs <= rhs;}}},
-        {pred_t::NE,  {[](int lhs, int rhs)-> int {return lhs != rhs;}}}
+        {pred_t::EQ,  {[](int lhs, int rhs)-> int {return lhs == rhs;}}},
+        {pred_t::NEQ, {[](int lhs, int rhs)-> int {return lhs != rhs;}}}
     };
     inline static std::unordered_map<pred_t, std::function<void()>> dumped_pred = {
         {pred_t::GR,  {[]() {std::cout << ">" << std::endl;}}},
         {pred_t::GRE, {[]() {std::cout << ">=" << std::endl;}}},
         {pred_t::LW,  {[]() {std::cout << "<" << std::endl;}}},
         {pred_t::LWE, {[]() {std::cout << "<=" << std::endl;}}},
-        {pred_t::NE,  {[]() {std::cout << "!=" << std::endl;}}}
+        {pred_t::EQ,  {[]() {std::cout << "==" << std::endl;}}},
+        {pred_t::NEQ, {[]() {std::cout << "!=" << std::endl;}}}
     };
 public:
     predNode(pred_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
