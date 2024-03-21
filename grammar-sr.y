@@ -35,7 +35,7 @@ parser::token_type yylex(parser::semantic_type* yylval,
   MINUS   "-"
   MULT    "*"
   GR      ">"
-  GRE     "=>"
+  GRE     ">="
   LW      "<"
   LWE     "<="
   NE      "!="
