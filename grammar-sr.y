@@ -48,50 +48,62 @@ parser::token_type yylex(parser::semantic_type* yylval,
 ;
 
 %token <int> NUMBER
-%nterm <std::shared_ptr<iNode>> expressions expr term factor
+%token <std::string> ID
+%nterm <std::shared_ptr<iNode>> expr term factor variable
 
 %left '+' '-' 
 %left '*' '/' 
 %left UMINUS
 
-%start lines
+%start programm
 
 %%
 
-lines: lines expressions '\n' 
-     | expressions '\n' 
+programm: lines;
+
+lines: line | lines line;
+
+line: statement '\n' | '\n'; 
+
+statement:  expr SCOLON {
+                  #ifdef DEBUG_GRAMMAR
+                    dumpTree($1, 0);  
+                  #else
+                    std::cout << eval($1) << std::endl;
+                  #endif
+            }
+          /*| assignment SCOLON {
+                  #ifdef DEBUG_GRAMMAR
+                    dumpTree($1, 0);  
+                  #else
+                    std::cout << eval($1) << std::endl;
+                  #endif
+            }*/
 ;
 
-expressions: expr SCOLON  { 
-    #ifdef DEBUG_GRAMMAR
-      dumpTree($1, 0);  
-    #else
-      std::cout << eval($1) << std::endl;
-    #endif
-  }
+expr:      expr "+" term            { $$ = newArith(arith_t::PLUS, $1, $3); }
+        |  expr "-" term            { $$ = newArith(arith_t::MINUS, $1, $3); }  
+        |  expr ">" term            { $$ = newPred(pred_t::GR, $1, $3); }  
+        |  expr ">=" term           { $$ = newPred(pred_t::GRE, $1, $3); }  
+        |  expr "<" term            { $$ = newPred(pred_t::LW, $1, $3); }  
+        |  expr "<=" term           { $$ = newPred(pred_t::LWE, $1, $3); }  
+        |  expr "==" term           { $$ = newPred(pred_t::EQ, $1, $3); }  
+        |  expr "!=" term           { $$ = newPred(pred_t::NEQ, $1, $3); }    
+        |  variable "=" expr        { $$ = newAssign($1, $3);} 
+        |  term                                  
 ;
 
-expr:      expr PLUS term           { $$ = newArith(arith_t::PLUS, $1, $3);}
-        |  expr MINUS term          { $$ = newArith(arith_t::MINUS, $1, $3);}  
-        |  expr GR term             { $$ = newPred(pred_t::GR, $1, $3);}  
-        |  expr GRE term            { $$ = newPred(pred_t::GRE, $1, $3);}  
-        |  expr LW term             { $$ = newPred(pred_t::LW, $1, $3);}  
-        |  expr LWE term            { $$ = newPred(pred_t::LWE, $1, $3);}  
-        |  expr EQ term             { $$ = newPred(pred_t::EQ, $1, $3);}  
-        |  expr NEQ term            { $$ = newPred(pred_t::NEQ, $1, $3);}  
-        |  term                   
-;
-
-term : term MULT factor             { $$ = newArith(arith_t::MULT, $1, $3);}   
-     | term DIV factor              { $$ = newArith(arith_t::DIV, $1, $3);}   
+term : term MULT factor             { $$ = newArith(arith_t::MULT, $1, $3); }   
+     | term DIV factor              { $$ = newArith(arith_t::DIV, $1, $3); }   
      | factor
-     ;
- 
+;    
+
 factor :  NUMBER                    { $$ = newNumber($1); }
         | LBRAC expr RBRAC          { $$ = $2; }
-        | MINUS NUMBER %prec UMINUS { $$ = newNumber(-$2); }
-
+        | MINUS NUMBER %prec UMINUS { $$ = newNumber(-$2); }  
 ;
+
+variable: ID {$$ = newVar($1);} 
 
 %%
 

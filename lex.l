@@ -9,6 +9,7 @@
 WS      [ \t\n\v]+
 DIGIT   [0-9]
 DIGIT1  [1-9]
+ID      [a-zA-Z_][a-zA-Z0-9_]*
 %%
 
 {WS}              /* skip blanks and tabs */
@@ -27,6 +28,7 @@ DIGIT1  [1-9]
 ")"               return yy::parser::token_type::RBRAC;
 ";"               return yy::parser::token_type::SCOLON;
 {DIGIT1}{DIGIT}*  return yy::parser::token_type::NUMBER;
+{ID}              return yy::parser::token_type::ID;
 .			      return yy::parser::token_type::ERR;
 
 %%
