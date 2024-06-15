@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include <vector>
 
 inline void print(const std::unordered_map<std::string, int>& cont) {
     for (auto&& elem : cont) {
@@ -59,6 +60,28 @@ public:
     }
 };
 
+class entryNode {
+    std::vector<std::shared_ptr<iNode>> nodes_;
+public:
+    entryNode() {};
+
+    void insert(std::shared_ptr<iNode> node) {    
+        nodes_.emplace_back(node);
+    }
+
+    int eval() const {
+        for (auto&& node:nodes_) {
+            node->eval();
+        }
+        return 0;
+    }
+
+    void dump() {
+        for (auto&& node:nodes_) {
+            dumpTree(node, 0);
+        }
+    }
+};
 
 class arithNode: public iNode { 
     arith_t op_;
@@ -118,7 +141,6 @@ public:
         int right_value = right_ ? right_->eval(): 0.0;
 
         return predicates.at(op_)(left_value, right_value);
-
     }
     void dump(int indent) const override {
         std::cout << std::string(indent, ' ') << "OP: ";
@@ -144,12 +166,14 @@ public:
 class varNode: public iNode { 
     std::string id_;
 public:
-    varNode(const std::string& id): id_(id), iNode(nullptr, nullptr) {var_store.emplace(id_, 0);}
+    varNode(const std::string& id): id_(id), iNode(nullptr, nullptr) {
+        var_store.emplace(id_, 0);
+    }
 
     std::string name() const {return id_;}    
 
     int eval() const override {
-        return 0;
+        return var_store.at(id_);
     }
     void dump(int indent) const override {
         std::cout << std::string(indent, ' ') << "Var: " << id_ << std::endl;
@@ -161,8 +185,8 @@ public:
     assignNode(std::shared_ptr<iNode> var, std::shared_ptr<iNode> expr): iNode(var, expr) {}
 
     int eval() const override {
-        auto var_name = std::static_pointer_cast<varNode>(left_)->name();
-        var_store.at(var_name) = right_->eval();
+        auto id = std::static_pointer_cast<varNode>(left_)->name();
+        var_store.at(id) = right_->eval();
         return 0;
     }
     void dump(int indent) const override {
@@ -174,6 +198,10 @@ inline int eval(std::shared_ptr<iNode> node) {
     if (node == nullptr)
         return 0.0; 
     return node->eval(); 
+}
+
+inline std::shared_ptr<entryNode> newEntry() {
+    return std::make_shared<entryNode>();
 }
 
 inline std::shared_ptr<iNode> newArith(arith_t type, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {
