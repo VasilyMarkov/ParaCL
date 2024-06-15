@@ -6,6 +6,14 @@
 #include <unordered_map>
 #include <functional>
 
+inline void print(const std::unordered_map<std::string, int>& cont) {
+    for (auto&& elem : cont) {
+        std::cout << elem.first << " = " << elem.second << std::endl;
+    }
+}
+
+inline std::unordered_map<std::string, int> var_store; 
+
 enum class node_t{
     op,
     number,
@@ -121,7 +129,7 @@ public:
 class numNode: public iNode { 
     int value_;
 public:
-    numNode(int value) noexcept: 
+    numNode(int value): 
         value_(value), 
         iNode(nullptr, nullptr) {}
 
@@ -135,9 +143,10 @@ public:
 
 class varNode: public iNode { 
     std::string id_;
-    static std::unordered_map<std::string , int> variables;
 public:
-    varNode(std::string& id) noexcept : id_(id), iNode(nullptr, nullptr) {}
+    varNode(const std::string& id): id_(id), iNode(nullptr, nullptr) {var_store.emplace(id_, 0);}
+
+    std::string name() const {return id_;}    
 
     int eval() const override {
         return 0;
@@ -149,10 +158,11 @@ public:
 
 class assignNode: public iNode { 
 public:
-    assignNode(std::shared_ptr<iNode> var, std::shared_ptr<iNode> expr) noexcept : iNode(var, expr) {}
+    assignNode(std::shared_ptr<iNode> var, std::shared_ptr<iNode> expr): iNode(var, expr) {}
 
     int eval() const override {
-        // int value = expr_ ? expr_->eval(): 0.0;
+        auto var_name = std::static_pointer_cast<varNode>(left_)->name();
+        var_store.at(var_name) = right_->eval();
         return 0;
     }
     void dump(int indent) const override {

@@ -70,15 +70,9 @@ statement:  expr SCOLON {
                     dumpTree($1, 0);  
                   #else
                     std::cout << eval($1) << std::endl;
+                    print(var_store);
                   #endif
             }
-          /*| assignment SCOLON {
-                  #ifdef DEBUG_GRAMMAR
-                    dumpTree($1, 0);  
-                  #else
-                    std::cout << eval($1) << std::endl;
-                  #endif
-            }*/
 ;
 
 expr:      expr "+" term            { $$ = newArith(arith_t::PLUS, $1, $3); }
@@ -93,14 +87,14 @@ expr:      expr "+" term            { $$ = newArith(arith_t::PLUS, $1, $3); }
         |  term                                  
 ;
 
-term : term MULT factor             { $$ = newArith(arith_t::MULT, $1, $3); }   
-     | term DIV factor              { $$ = newArith(arith_t::DIV, $1, $3); }   
+term : term "*" factor             { $$ = newArith(arith_t::MULT, $1, $3); }   
+     | term "/" factor              { $$ = newArith(arith_t::DIV, $1, $3); }   
      | factor
 ;    
 
 factor :  NUMBER                    { $$ = newNumber($1); }
-        | LBRAC expr RBRAC          { $$ = $2; }
-        | MINUS NUMBER %prec UMINUS { $$ = newNumber(-$2); }  
+        | "(" expr ")"          { $$ = $2; }
+        | "MINUS" NUMBER %prec UMINUS { $$ = newNumber(-$2); }  
 ;
 
 variable: ID {$$ = newVar($1);} 
