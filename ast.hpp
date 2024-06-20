@@ -13,7 +13,7 @@ inline void print(const std::unordered_map<std::string, int>& cont) {
     }
 }
 
-inline std::unordered_map<std::string, int> var_store; 
+inline std::unordered_map<std::string, int> var_store; //global variables
 
 enum class node_t{
     op,
@@ -39,10 +39,10 @@ enum class pred_t{
 
 class iNode {    
 protected:
-    std::shared_ptr<iNode> left_;
-    std::shared_ptr<iNode> right_;
+    std::shared_ptr<iNode> left_ = nullptr;
+    std::shared_ptr<iNode> right_ = nullptr;
 public:
-    iNode(){}
+    iNode() = default;
     iNode(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
         left_(left), 
         right_(right) {}
@@ -50,9 +50,9 @@ public:
     virtual ~iNode(){}
 
     virtual int eval() const = 0;
-    virtual void dump(int) const = 0;
+    virtual void dump(int indent = 0) const = 0;
     
-    friend void dumpTree(std::shared_ptr<iNode> node, int indent) {
+    friend void dumpTree(std::shared_ptr<iNode> node, int indent = 0) {
         if (node == nullptr) return;   
         dumpTree(node->left_, indent + 4);
         node->dump(indent);
@@ -60,26 +60,35 @@ public:
     }
 };
 
-class entryNode {
-    std::vector<std::shared_ptr<iNode>> nodes_;
+class scopeNode: public iNode {
 public:
-    entryNode() {};
-
-    void insert(std::shared_ptr<iNode> node) {    
-        nodes_.emplace_back(node);
-    }
-
-    int eval() const {
-        for (auto&& node:nodes_) {
-            node->eval();
-        }
+    scopeNode(std::shared_ptr<iNode> right, std::shared_ptr<iNode> left): iNode(right, left) {}
+    int eval() const override {
+        left_->eval();
+        right_->eval();
         return 0;
     }
+    void dump(int indent = 0) const override {
+        // std::cout << std::string(indent, ' ') << "SCOPE: ";
+    }
+};
 
-    void dump() {
-        for (auto&& node:nodes_) {
-            dumpTree(node, 0);
-        }
+class ifNode: public iNode {
+   std::shared_ptr<iNode> expr_ = nullptr; 
+public:
+    ifNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt): 
+        expr_(expr), 
+        iNode(if_stmt, else_stmt) {}
+
+    int eval() const override {
+        if (expr_->eval() == true && right_ != nullptr)
+            right_->eval();
+        else if (left_ != nullptr)
+            left_->eval();
+        return 0;
+    }
+    void dump(int indent = 0) const override {
+        // std::cout << std::string(indent, ' ') << "IF: ";
     }
 };
 
@@ -107,7 +116,7 @@ public:
 
         return operations.at(op_)(left_value, right_value);
     }
-    void dump(int indent) const override {
+    void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "OP: ";
         dumped_arith.at(op_)();
     }
@@ -142,7 +151,7 @@ public:
 
         return predicates.at(op_)(left_value, right_value);
     }
-    void dump(int indent) const override {
+    void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "OP: ";
         dumped_pred.at(op_)();
     }
@@ -158,7 +167,7 @@ public:
     int eval() const override {
         return value_; 
     }
-    void dump(int indent) const override {
+    void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "Num: " << value_ << std::endl;
     }
 };
@@ -175,33 +184,31 @@ public:
     int eval() const override {
         return var_store.at(id_);
     }
-    void dump(int indent) const override {
+    void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "Var: " << id_ << std::endl;
     }
 };
 
 class assignNode: public iNode { 
 public:
-    assignNode(std::shared_ptr<iNode> var, std::shared_ptr<iNode> expr): iNode(var, expr) {}
+    assignNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> var): iNode(expr, var) {}
 
     int eval() const override {
         auto id = std::static_pointer_cast<varNode>(left_)->name();
         var_store.at(id) = right_->eval();
         return 0;
     }
-    void dump(int indent) const override {
+    void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "=" << std::endl;
     }
 };
 
-inline int eval(std::shared_ptr<iNode> node) {
-    if (node == nullptr)
-        return 0.0; 
-    return node->eval(); 
+inline std::shared_ptr<iNode> newScope(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {
+    return std::make_shared<scopeNode>(left, right);
 }
 
-inline std::shared_ptr<entryNode> newEntry() {
-    return std::make_shared<entryNode>();
+inline std::shared_ptr<iNode> newIf(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt) {
+    return std::make_shared<ifNode>(expr, if_stmt, else_stmt);
 }
 
 inline std::shared_ptr<iNode> newArith(arith_t type, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {
@@ -220,7 +227,7 @@ inline std::shared_ptr<iNode> newVar(std::string& id) {
     return std::make_shared<varNode>(id);
 }
 
-inline std::shared_ptr<iNode> newAssign(std::shared_ptr<iNode> var, std::shared_ptr<iNode> expr) {
-    return std::make_shared<assignNode>(var, expr);
+inline std::shared_ptr<iNode> newAssign(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> var) {
+    return std::make_shared<assignNode>(expr, var);
 }
 

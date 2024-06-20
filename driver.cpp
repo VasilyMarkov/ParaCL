@@ -9,9 +9,6 @@ int main() {
   yy::NumDriver driver(lexer);
   
   driver.parse();
-  driver.dumpAst();
-  driver.evalAst();
-  print(var_store);
   delete lexer;
   return 0;
 }

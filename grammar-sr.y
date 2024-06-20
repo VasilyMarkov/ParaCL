@@ -40,28 +40,36 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
   DIV     "/"
   LBRAC   "("
   RBRAC   ")"
+  LBRACE   "{"
+  RBRACE   "}"
   SCOLON  ";"
+  IF      "if"
+  ELSE    "else"
   ERR
 ;
 
 %token <int> NUMBER
 %token <std::string> ID
-%nterm <std::shared_ptr<iNode>> expr term factor variable
+%nterm <std::shared_ptr<iNode>> expr term factor statements statement expr_statement
 
 %left '+' '-' 
 %left '*' '/' 
 %left UMINUS
 
-%start programm
+%start program
 
 %%
 
-programm: statements;
+program: statements {$1->eval(); dumpTree($1); print(var_store);}
 
-statements: statement | statements statement;
+statements:   statement
+            | statements statement  {$$ = newScope($1, $2);}
 
-statement:  expr ";"             {driver->getAst()->insert($1);};
+statement:  expr_statement   
+          | IF "(" expr ")" "{" statements "}" {$$ = newIf($3, $6, nullptr);}
+          | IF "(" expr ")" "{" statements "}" ELSE "{" statements "}" {$$ = newIf($3, $6, $10);}
 
+expr_statement: expr ";" {$$ = $1;}   
 
 expr:      expr "+" term            {$$ = newArith(arith_t::PLUS, $1, $3);}
         |  expr "-" term            {$$ = newArith(arith_t::MINUS, $1, $3);}  
