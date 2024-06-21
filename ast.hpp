@@ -62,7 +62,8 @@ public:
 
 class scopeNode: public iNode {
 public:
-    scopeNode(std::shared_ptr<iNode> right, std::shared_ptr<iNode> left): iNode(right, left) {}
+    scopeNode(std::shared_ptr<iNode> right, std::shared_ptr<iNode> left): 
+        iNode(right, left) {}
     int eval() const override {
         left_->eval();
         right_->eval();
@@ -81,14 +82,33 @@ public:
         iNode(if_stmt, else_stmt) {}
 
     int eval() const override {
-        if (expr_->eval() == true && right_ != nullptr)
-            right_->eval();
-        else if (left_ != nullptr)
+        if (expr_ != nullptr && expr_->eval() && left_ != nullptr) {
             left_->eval();
+        }
+        else if (expr_ != nullptr && !expr_->eval() && right_ != nullptr) {
+            std::cout << "false" << std::endl;
+            right_->eval();
+        }
         return 0;
     }
     void dump(int indent = 0) const override {
-        // std::cout << std::string(indent, ' ') << "IF: ";
+        // std::cout << std::string(indent, ' ') << "If: " << std::endl;
+    }
+};
+
+
+class whileNode: public iNode {
+public:
+    whileNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> stmt): 
+        iNode(expr, stmt) {}
+
+    int eval() const override {
+        while (left_->eval() == true && left_ != nullptr)
+            right_->eval();
+        return 0;
+    }
+    void dump(int indent = 0) const override {
+        // std::cout << std::string(indent, ' ') << "While: ";
     }
 };
 
@@ -209,6 +229,10 @@ inline std::shared_ptr<iNode> newScope(std::shared_ptr<iNode> left, std::shared_
 
 inline std::shared_ptr<iNode> newIf(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt) {
     return std::make_shared<ifNode>(expr, if_stmt, else_stmt);
+}
+
+inline std::shared_ptr<iNode> newWhile(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> stmt) {
+    return std::make_shared<whileNode>(expr, stmt);
 }
 
 inline std::shared_ptr<iNode> newArith(arith_t type, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {

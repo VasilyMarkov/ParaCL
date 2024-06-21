@@ -35,8 +35,8 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
   GRE     ">="
   LW      "<"
   LWE     "<="
-  EQ      "!="
-  NEQ     "=="
+  EQ      "=="
+  NEQ     "!="
   DIV     "/"
   LBRAC   "("
   RBRAC   ")"
@@ -45,6 +45,7 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
   SCOLON  ";"
   IF      "if"
   ELSE    "else"
+  WHILE   "while"
   ERR
 ;
 
@@ -68,6 +69,7 @@ statements:   statement
 statement:  expr_statement   
           | IF "(" expr ")" "{" statements "}" {$$ = newIf($3, $6, nullptr);}
           | IF "(" expr ")" "{" statements "}" ELSE "{" statements "}" {$$ = newIf($3, $6, $10);}
+          | WHILE "(" expr ")" "{" statements "}" {$$ = newWhile($3, $6);}
 
 expr_statement: expr ";" {$$ = $1;}   
 
