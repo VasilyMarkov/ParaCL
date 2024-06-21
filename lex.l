@@ -36,6 +36,7 @@ WHILE   "while"
 "}"               return yy::parser::token_type::RBRACE;
 ";"               return yy::parser::token_type::SCOLON;
 {DIGIT1}{DIGIT}*  return yy::parser::token_type::NUMBER;
+{DIGIT}           return yy::parser::token_type::NUMBER;
 {ID}              return yy::parser::token_type::ID;
 .			      return yy::parser::token_type::ERR;
 
