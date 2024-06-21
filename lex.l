@@ -30,6 +30,9 @@ WHILE   "while"
 "<="              return yy::parser::token_type::LWE;
 "=="              return yy::parser::token_type::EQ;
 "!="              return yy::parser::token_type::NEQ;
+"&&"              return yy::parser::token_type::AND;
+"||"              return yy::parser::token_type::OR;
+"!"               return yy::parser::token_type::NOT;
 "("               return yy::parser::token_type::LBRAC;
 ")"               return yy::parser::token_type::RBRAC;
 "{"               return yy::parser::token_type::LBRACE;
