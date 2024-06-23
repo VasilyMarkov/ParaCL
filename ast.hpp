@@ -72,7 +72,7 @@ public:
         return 0;
     }
     void dump(int indent = 0) const override {
-        // std::cout << std::string(indent, ' ') << "SCOPE: ";
+
     }
 };
 
@@ -88,16 +88,14 @@ public:
             left_->eval();
         }
         else if (expr_ != nullptr && !expr_->eval() && right_ != nullptr) {
-            std::cout << "false" << std::endl;
             right_->eval();
         }
         return 0;
     }
     void dump(int indent = 0) const override {
-        // std::cout << std::string(indent, ' ') << "If: " << std::endl;
+
     }
 };
-
 
 class whileNode: public iNode {
 public:
@@ -113,19 +111,33 @@ public:
         return 0;
     }
     void dump(int indent = 0) const override {
-        // std::cout << std::string(indent, ' ') << "While: ";
+
     }
 };
 
 class notNode: public iNode {
 public:
     notNode() = default;
-    explicit notNode(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): iNode(left, right) {std::cout << "not" << std::endl;}
+    explicit notNode(std::shared_ptr<iNode> left): 
+        iNode(left, nullptr) {}
     int eval() const override {
         return !left_->eval();
     }
     void dump(int indent = 0) const override {
-        // std::cout << std::string(indent, ' ') << "While: ";
+
+    }
+};
+
+class minusNode: public iNode {
+public:
+    minusNode() = default;
+    explicit minusNode(std::shared_ptr<iNode> left): 
+        iNode(left, nullptr) {}
+    int eval() const override {
+        return -left_->eval();
+    }
+    void dump(int indent = 0) const override {
+
     }
 };
 
@@ -216,7 +228,10 @@ public:
 class varNode: public iNode { 
     std::string id_;
 public:
-    explicit varNode(const std::string& id): id_(id), iNode(nullptr, nullptr) {
+    explicit varNode(const std::string& id): 
+        id_(id), 
+        iNode(nullptr, nullptr) 
+    {
         var_store.emplace(id_, 0);
     }
 
@@ -233,7 +248,8 @@ public:
 
 class assignNode: public iNode { 
 public:
-    explicit assignNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> var): iNode(expr, var) {}
+    explicit assignNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> var): 
+        iNode(expr, var) {}
 
     int eval() const override {
         auto var = std::static_pointer_cast<varNode>(left_);
@@ -258,7 +274,11 @@ inline std::shared_ptr<iNode> newWhile(std::shared_ptr<iNode> expr, std::shared_
 }
 
 inline std::shared_ptr<iNode> newNot(std::shared_ptr<iNode> expr) {
-    return std::make_shared<notNode>(expr, nullptr);
+    return std::make_shared<notNode>(expr);
+}
+
+inline std::shared_ptr<iNode> newMinus(std::shared_ptr<iNode> expr) {
+    return std::make_shared<minusNode>(expr);
 }
 
 inline std::shared_ptr<iNode> newArith(arith_t type, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {

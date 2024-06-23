@@ -13,12 +13,14 @@ ID      [a-zA-Z_][a-zA-Z0-9_]*
 IF      "if"
 ELSE    "else"
 WHILE   "while"
+INPUT   "?"
 %%
 
 {WS}              /* skip blanks and tabs */
 {IF}              return yy::parser::token_type::IF;
 {ELSE}            return yy::parser::token_type::ELSE;
 {WHILE}           return yy::parser::token_type::WHILE;
+{INPUT}           return yy::parser::token_type::INPUT;
 "+"               return yy::parser::token_type::PLUS;
 "-"               return yy::parser::token_type::MINUS;
 "*"               return yy::parser::token_type::MULT;

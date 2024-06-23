@@ -49,12 +49,14 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
   IF      "if"
   ELSE    "else"
   WHILE   "while"
+  INPUT   "?"
   ERR
 ;
 
 %token <int> NUMBER
 %token <std::string> ID
-%nterm <std::shared_ptr<iNode>> term factor statements statement expr_statement if_statement while_statement expr
+%nterm <std::shared_ptr<iNode>> term factor expr 
+%nterm <std::shared_ptr<iNode>> expr_statement if_statement while_statement statement statements     
 
 %left '+' '-' 
 %left '*' '/' 
@@ -86,14 +88,16 @@ expr_statement:   expr ";" {$$ = $1;}
 expr:      term "+"  expr            {$$ = newArith(arith_t::PLUS, $1, $3);}
         |  term "-"  expr            {$$ = newArith(arith_t::MINUS, $1, $3);}  
         |  term ">"  expr            {$$ = newPred(pred_t::GR, $1, $3);}  
-        |  term ">=" expr           {$$ = newPred(pred_t::GRE, $1, $3);}  
+        |  term ">=" expr            {$$ = newPred(pred_t::GRE, $1, $3);}  
         |  term "<"  expr            {$$ = newPred(pred_t::LW, $1, $3);}  
-        |  term "<=" expr           {$$ = newPred(pred_t::LWE, $1, $3);}  
-        |  term "==" expr           {$$ = newPred(pred_t::EQ, $1, $3);}  
-        |  term "!=" expr           {$$ = newPred(pred_t::NEQ, $1, $3);}    
-        |  term "&&" expr           {$$ = newPred(pred_t::AND, $1, $3);}    
-        |  term "||" expr           {$$ = newPred(pred_t::OR, $1, $3);}    
+        |  term "<=" expr            {$$ = newPred(pred_t::LWE, $1, $3);}  
+        |  term "==" expr            {$$ = newPred(pred_t::EQ, $1, $3);}  
+        |  term "!=" expr            {$$ = newPred(pred_t::NEQ, $1, $3);}    
+        |  term "&&" expr            {$$ = newPred(pred_t::AND, $1, $3);}    
+        |  term "||" expr            {$$ = newPred(pred_t::OR, $1, $3);}    
         |  term "="  expr            {$$ = newAssign($1, $3);} 
+        |  "-" expr %prec UMINUS     {$$ = newMinus($2);} 
+        |  "!" expr %prec UNOT       {$$ = newNot($2);} 
         |  term                                  
 ;
 
