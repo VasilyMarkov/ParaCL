@@ -45,7 +45,7 @@ protected:
     std::shared_ptr<iNode> right_ = nullptr;
 public:
     iNode() = default;
-    explicit iNode(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
+    iNode(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
         left_(left), 
         right_(right) {}
     
@@ -64,13 +64,15 @@ public:
 
 class scopeNode: public iNode {
 public:
-    explicit scopeNode(std::shared_ptr<iNode> right, std::shared_ptr<iNode> left): 
+    scopeNode(std::shared_ptr<iNode> right, std::shared_ptr<iNode> left): 
         iNode(right, left) {}
+
     int eval() const override {
         left_->eval();
         right_->eval();
         return 0;
     }
+
     void dump(int indent = 0) const override {
 
     }
@@ -79,7 +81,7 @@ public:
 class ifNode: public iNode {
    std::shared_ptr<iNode> expr_ = nullptr; 
 public:
-    explicit ifNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt): 
+    ifNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt): 
         expr_(expr), 
         iNode(if_stmt, else_stmt) {}
 
@@ -92,6 +94,7 @@ public:
         }
         return 0;
     }
+
     void dump(int indent = 0) const override {
 
     }
@@ -99,7 +102,7 @@ public:
 
 class whileNode: public iNode {
 public:
-    explicit whileNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> stmt): 
+    whileNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> stmt): 
         iNode(expr, stmt) {}
 
     int eval() const override {
@@ -110,6 +113,7 @@ public:
         }
         return 0;
     }
+
     void dump(int indent = 0) const override {
 
     }
@@ -118,11 +122,13 @@ public:
 class notNode: public iNode {
 public:
     notNode() = default;
-    explicit notNode(std::shared_ptr<iNode> left): 
+    notNode(std::shared_ptr<iNode> left): 
         iNode(left, nullptr) {}
+
     int eval() const override {
         return !left_->eval();
     }
+
     void dump(int indent = 0) const override {
 
     }
@@ -131,11 +137,13 @@ public:
 class minusNode: public iNode {
 public:
     minusNode() = default;
-    explicit minusNode(std::shared_ptr<iNode> left): 
+    minusNode(std::shared_ptr<iNode> left): 
         iNode(left, nullptr) {}
+
     int eval() const override {
         return -left_->eval();
     }
+
     void dump(int indent = 0) const override {
 
     }
@@ -156,15 +164,17 @@ class arithNode: public iNode {
         {arith_t::DIV,   {[]() {std::cout << "/" << std::endl;}}},
     };
 public:
-    explicit arithNode(arith_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
+    arithNode(arith_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
         op_(op), 
         iNode(left, right) {}
+
     int eval() const override {
         int left_value = left_ ? left_->eval(): 0.0;
         int right_value = right_ ? right_->eval(): 0.0;
 
         return operations_.at(op_)(left_value, right_value);
     }
+
     void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "OP: ";
         dumped_arith_.at(op_)();
@@ -194,7 +204,7 @@ class predNode: public iNode {
         {pred_t::OR,  {[]() {std::cout << "||" << std::endl;}}}
     };
 public:
-    explicit predNode(pred_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) noexcept: 
+    predNode(pred_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) noexcept: 
         op_(op), 
         iNode(left, right) {}
 
@@ -204,6 +214,7 @@ public:
 
         return predicates_.at(op_)(left_value, right_value);
     }
+
     void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "OP: ";
         dumped_pred_.at(op_)();
@@ -211,15 +222,16 @@ public:
 };
 
 class numNode: public iNode { 
-    int value_;
+    int value_ = 0;
 public:
     explicit numNode(int value): 
         value_(value), 
-        iNode(nullptr, nullptr) {}
+        iNode() {}
 
     int eval() const override {
         return value_;
     }
+
     void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "Num: " << value_ << std::endl;
     }
@@ -230,7 +242,7 @@ class varNode: public iNode {
 public:
     explicit varNode(const std::string& id): 
         id_(id), 
-        iNode(nullptr, nullptr) 
+        iNode() 
     {
         var_store.emplace(id_, 0);
     }
@@ -241,8 +253,40 @@ public:
         return var_store.at(id_);
 
     }
+
     void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "Var: " << id_ << std::endl;
+    }
+};
+
+class inputNode: public iNode {
+public:
+    inputNode(): iNode() {}
+
+    int eval() const override {
+        std::cout << "Entry: " << std::endl;
+        int input = 0;
+        std::cin >> input;
+        return input;
+    }
+
+    void dump(int indent = 0) const override {
+        
+    }
+};
+
+class outputNode: public iNode {
+    std::string id_;
+public:
+    outputNode(std::string& id): id_(id), iNode() {}
+
+    int eval() const override {
+        std::cout << id_ << " = " << var_store.at(id_) << std::endl;
+        return 0;
+    }
+
+    void dump(int indent = 0) const override {
+        
     }
 };
 
@@ -256,6 +300,7 @@ public:
         var_store.at(var->name()) = right_->eval();
         return 0;
     }
+
     void dump(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "=" << std::endl;
     }
@@ -291,6 +336,14 @@ inline std::shared_ptr<iNode> newPred(pred_t type, std::shared_ptr<iNode> left, 
 
 inline std::shared_ptr<iNode> newNumber(int value) {
     return std::make_shared<numNode>(value);
+}
+
+inline std::shared_ptr<iNode> newInput() {
+    return std::make_shared<inputNode>();
+}
+
+inline std::shared_ptr<iNode> newOutput(std::string& id) {
+    return std::make_shared<outputNode>(id);
 }
 
 inline std::shared_ptr<iNode> newVar(std::string& id) {

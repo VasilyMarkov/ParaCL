@@ -14,6 +14,7 @@ IF      "if"
 ELSE    "else"
 WHILE   "while"
 INPUT   "?"
+OUTPUT  "print"
 %%
 
 {WS}              /* skip blanks and tabs */
@@ -21,6 +22,7 @@ INPUT   "?"
 {ELSE}            return yy::parser::token_type::ELSE;
 {WHILE}           return yy::parser::token_type::WHILE;
 {INPUT}           return yy::parser::token_type::INPUT;
+{OUTPUT}          return yy::parser::token_type::OUTPUT;
 "+"               return yy::parser::token_type::PLUS;
 "-"               return yy::parser::token_type::MINUS;
 "*"               return yy::parser::token_type::MULT;

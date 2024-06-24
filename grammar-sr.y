@@ -50,6 +50,7 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
   ELSE    "else"
   WHILE   "while"
   INPUT   "?"
+  OUTPUT  "print"
   ERR
 ;
 
@@ -67,10 +68,11 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
 
 %%
 
-program: statements {$1->eval(); dumpTree($1); print(var_store);}
+program: statements {$1->eval(); dumpTree($1);}
 
 statements:   statement
             | statements statement  {$$ = newScope($1, $2);}
+;
 
 statement:  expr_statement   
           | if_statement  
@@ -79,31 +81,33 @@ statement:  expr_statement
 
 if_statement:   IF "(" expr ")" "{" statements "}" {$$ = newIf($3, $6, nullptr);}
               | IF "(" expr ")" "{" statements "}" ELSE "{" statements "}" {$$ = newIf($3, $6, $10);}
+;
 
 while_statement: WHILE "(" expr ")" "{" statements "}" {$$ = newWhile($3, $6);}
 
+expr_statement: expr ";" {$$ = $1;}    
 
-expr_statement:   expr ";" {$$ = $1;}    
-
-expr:      term "+"  expr            {$$ = newArith(arith_t::PLUS, $1, $3);}
-        |  term "-"  expr            {$$ = newArith(arith_t::MINUS, $1, $3);}  
-        |  term ">"  expr            {$$ = newPred(pred_t::GR, $1, $3);}  
-        |  term ">=" expr            {$$ = newPred(pred_t::GRE, $1, $3);}  
-        |  term "<"  expr            {$$ = newPred(pred_t::LW, $1, $3);}  
-        |  term "<=" expr            {$$ = newPred(pred_t::LWE, $1, $3);}  
-        |  term "==" expr            {$$ = newPred(pred_t::EQ, $1, $3);}  
-        |  term "!=" expr            {$$ = newPred(pred_t::NEQ, $1, $3);}    
-        |  term "&&" expr            {$$ = newPred(pred_t::AND, $1, $3);}    
-        |  term "||" expr            {$$ = newPred(pred_t::OR, $1, $3);}    
-        |  term "="  expr            {$$ = newAssign($1, $3);} 
-        |  "-" expr %prec UMINUS     {$$ = newMinus($2);} 
-        |  "!" expr %prec UNOT       {$$ = newNot($2);} 
-        |  term                                  
+expr:    term "+"  expr            {$$ = newArith(arith_t::PLUS, $1, $3);}
+      |  term "-"  expr            {$$ = newArith(arith_t::MINUS, $1, $3);}  
+      |  term ">"  expr            {$$ = newPred(pred_t::GR, $1, $3);}  
+      |  term ">=" expr            {$$ = newPred(pred_t::GRE, $1, $3);}  
+      |  term "<"  expr            {$$ = newPred(pred_t::LW, $1, $3);}  
+      |  term "<=" expr            {$$ = newPred(pred_t::LWE, $1, $3);}  
+      |  term "==" expr            {$$ = newPred(pred_t::EQ, $1, $3);}  
+      |  term "!=" expr            {$$ = newPred(pred_t::NEQ, $1, $3);}    
+      |  term "&&" expr            {$$ = newPred(pred_t::AND, $1, $3);}    
+      |  term "||" expr            {$$ = newPred(pred_t::OR, $1, $3);}    
+      |  term "="  expr            {$$ = newAssign($1, $3);} 
+      |  term "=" "?"              {$$ = newInput();} 
+      |  "-" expr %prec UMINUS     {$$ = newMinus($2);} 
+      |  "!" expr %prec UNOT       {$$ = newNot($2);} 
+      |  "print" ID                {$$ = newOutput($2);} 
+      |  term                            
 ;
 
-term : term "*" factor              {$$ = newArith(arith_t::MULT, $1, $3);}   
-     | term "/" factor              {$$ = newArith(arith_t::DIV, $1, $3);}   
-     | factor
+term :  term "*" factor              {$$ = newArith(arith_t::MULT, $1, $3);}   
+      | term "/" factor              {$$ = newArith(arith_t::DIV, $1, $3);}   
+      | factor
 ;    
 
 factor :  NUMBER                      {$$ = newNumber($1);}
