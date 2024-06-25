@@ -4,7 +4,7 @@
 %skeleton "lalr1.cc"
 %defines
 %define api.value.type variant
-%param {yy::NumDriver* driver}
+%param {yy::Driver* driver}
 
 %code requires
 {
@@ -12,7 +12,7 @@
 #include <string>
 #include <ast.hpp>
 
-namespace yy { class NumDriver; }
+namespace yy { class Driver; }
 
 }
 
@@ -21,7 +21,7 @@ namespace yy { class NumDriver; }
 #include "driver.hpp"
 
 namespace yy {
-parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
+parser::token_type yylex(parser::semantic_type* yylval, Driver* driver);
 }
 
 }
@@ -68,7 +68,7 @@ parser::token_type yylex(parser::semantic_type* yylval, NumDriver* driver);
 
 %%
 
-program: statements {$1->eval(); dumpTree($1);}
+program: statements {$1->eval(); std::cout << "var_store:" << std::endl; print(var_store); }
 
 statements:   statement
             | statements statement  {$$ = newScope($1, $2);}
@@ -98,7 +98,6 @@ expr:    term "+"  expr            {$$ = newArith(arith_t::PLUS, $1, $3);}
       |  term "&&" expr            {$$ = newPred(pred_t::AND, $1, $3);}    
       |  term "||" expr            {$$ = newPred(pred_t::OR, $1, $3);}    
       |  term "="  expr            {$$ = newAssign($1, $3);} 
-      |  term "=" "?"              {$$ = newInput();} 
       |  "-" expr %prec UMINUS     {$$ = newMinus($2);} 
       |  "!" expr %prec UNOT       {$$ = newNot($2);} 
       |  "print" ID                {$$ = newOutput($2);} 
@@ -112,15 +111,15 @@ term :  term "*" factor              {$$ = newArith(arith_t::MULT, $1, $3);}
 
 factor :  NUMBER                      {$$ = newNumber($1);}
         | "(" expr ")"                {$$ = $2;}
-        |  ID                         {$$ = newVar($1);}
+        | ID                          {$$ = newVar($1);}
+        | "?"                         {$$ = newInput();}
 ;  
 
 %%
 
 namespace yy {
 
-parser::token_type yylex(parser::semantic_type* yylval,                         
-                         NumDriver* driver)
+parser::token_type yylex(parser::semantic_type* yylval, Driver* driver)
 {
   return driver->yylex(yylval);
 }

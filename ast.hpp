@@ -14,6 +14,7 @@ inline void print(const std::unordered_map<std::string, int>& cont) {
 }
 
 inline std::unordered_map<std::string, int> var_store; //global variables
+inline std::vector<int> temp_store; //input values
 
 enum class node_t{
     op,
@@ -49,7 +50,7 @@ public:
         left_(left), 
         right_(right) {}
     
-    virtual ~iNode(){}
+    virtual ~iNode() = default;
 
     virtual int eval() const = 0;
     virtual void dump(int indent = 0) const = 0;
@@ -251,7 +252,6 @@ public:
 
     int eval() const override {    
         return var_store.at(id_);
-
     }
 
     void dump(int indent = 0) const override {
@@ -261,10 +261,9 @@ public:
 
 class inputNode: public iNode {
 public:
-    inputNode(): iNode() {}
+    inputNode(): iNode(){}
 
-    int eval() const override {
-        std::cout << "Entry: " << std::endl;
+    int eval() const override  {
         int input = 0;
         std::cin >> input;
         return input;
@@ -278,7 +277,7 @@ public:
 class outputNode: public iNode {
     std::string id_;
 public:
-    outputNode(std::string& id): id_(id), iNode() {}
+    outputNode(std::string& id): iNode(), id_(id){}
 
     int eval() const override {
         std::cout << id_ << " = " << var_store.at(id_) << std::endl;

@@ -1,8 +1,14 @@
 %option c++
+%option yylineno
+size_t line = lineno();
+%option noyywrap
+
+%option yyclass="yy::Lexer"
 
 %{
 
 #include "grammar.tab.hh"
+#include "driver.hpp"
 
 %}
 
