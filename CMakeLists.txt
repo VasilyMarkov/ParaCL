@@ -17,7 +17,7 @@ find_package(FLEX REQUIRED)
 option(DEBUG_GRAMMAR "Debug" ON)
 
 set(GRAMMAR "grammar-sr.y" CACHE STRING "file with grammar" FORCE)
-# set(GRAMMAR "test.y" CACHE STRING "file with grammar" FORCE)
+# set(GRAMMAR "grammar_small.y" CACHE STRING "file with grammar" FORCE)
 
 if(DEBUG_GRAMMAR)
   message("Debug")
@@ -45,6 +45,7 @@ message("CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS_RELEASE}")
 
 add_executable(${PROJECT_NAME} 
   driver.cpp  
+  ast.cpp  
   ${BISON_parser_OUTPUTS}
   ${FLEX_scanner_OUTPUTS}
 )

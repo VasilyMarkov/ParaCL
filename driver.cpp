@@ -2,8 +2,10 @@
 #include <fstream>
 #include <memory>
 #include "driver.hpp"
+#include <exception>
 
 // int yyFlexLexer::yywrap() { return 1; }
+using namespace yy;
 
 int main(int argc, char *argv[]) {
 
@@ -16,8 +18,15 @@ int main(int argc, char *argv[]) {
 		std::cerr << "Error opening file!" << std::endl;
 		return 0;
 	}
-  yy::Driver driver(file);
-  driver.parse();
+  try {
+    yy::Driver driver(file);
+    driver.parse();
+    driver.ast_->eval(driver.evaluator);
+    print(var_store);
+  } 
+  catch(std::exception& exp) {
+    std::cout << exp.what() << std::endl;
+  }
   file.close();
   return 0;
 }

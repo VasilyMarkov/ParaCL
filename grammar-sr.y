@@ -68,7 +68,7 @@ parser::token_type yylex(parser::semantic_type* yylval, Driver* driver);
 
 %%
 
-program: statements {$1->eval(); std::cout << "var_store:" << std::endl; print(var_store); }
+program: statements {driver->ast_ = $1;}
 
 statements:   statement
             | statements statement  {$$ = newScope($1, $2);}
