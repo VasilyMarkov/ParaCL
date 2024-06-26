@@ -44,7 +44,7 @@ message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 message("CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS_RELEASE}")
 
 add_executable(${PROJECT_NAME} 
-  driver.cpp  
+  main.cpp  
   ast.cpp  
   ${BISON_parser_OUTPUTS}
   ${FLEX_scanner_OUTPUTS}

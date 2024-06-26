@@ -17,7 +17,10 @@ public:
 };
 
 class Driver {
-  std::unique_ptr<Lexer> lex_;
+  std::unique_ptr<Lexer> lex_ = nullptr;
+  std::unique_ptr<iNode> ast_ = nullptr;
+  evalVisitor evaluator_;
+  bool isParsed = false;
 public:
   Driver(std::ifstream& file): lex_(std::make_unique<Lexer>()) {
     lex_->switch_streams(file, std::cout);
@@ -38,13 +41,22 @@ public:
 
     return tt;
   }
+  
+  void setAST(std::unique_ptr<iNode> ast) noexcept {ast_ = std::move(ast);}
 
-  std::shared_ptr<iNode> ast_;
-  evalVisitor evaluator;
+  void eval() {
+    if (isParsed) {
+      ast_->eval(evaluator_);
+    }
+    else {
+      std::cout << "AST not yet or correct parsed" << std::endl;
+    }
+  }
 
   bool parse() {
     parser parser(this);
     bool res = parser.parse();
+    isParsed = !res;
     return !res;
   }
 

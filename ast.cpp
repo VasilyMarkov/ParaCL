@@ -83,9 +83,9 @@ int evalVisitor::visit(const outputNode& node)
 
 int evalVisitor::visit(const assignNode& node)
 {
-    auto var = std::static_pointer_cast<varNode>(node.left_);
-    var_store.at(var->name()) = node.right_->eval(*this);
-
+    if (auto var = dynamic_cast<varNode*>(node.left_.get())) {
+        var_store.at(var->name()) = node.right_->eval(*this);
+    }
     return 0;
 }
 

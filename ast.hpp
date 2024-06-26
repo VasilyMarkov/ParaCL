@@ -68,20 +68,20 @@ public:
 
 class iNode {    
 protected:
-    std::shared_ptr<iNode> left_ = nullptr;
-    std::shared_ptr<iNode> right_ = nullptr;
+    std::unique_ptr<iNode> left_ = nullptr;
+    std::unique_ptr<iNode> right_ = nullptr;
 public:
     iNode() = default;
-    iNode(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) noexcept: 
-        left_(left), 
-        right_(right) {}
+    iNode(std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) noexcept: 
+        left_(std::move(left)), 
+        right_(std::move(right)) {}
     
     virtual ~iNode() = default;
 
     virtual int eval(Visitor&) const = 0;
     virtual void dump(int indent = 0) const = 0;
     friend evalVisitor;
-    // friend void dumpTree(std::shared_ptr<iNode> node, int indent = 0) {
+    // friend void dumpTree(std::unique_ptr<iNode> node, int indent = 0) {
     //     if (node == nullptr) return;   
     //     dumpTree(node->left_, indent + 4);
     //     node->dump(indent);
@@ -92,8 +92,8 @@ public:
 
 class scopeNode: public iNode {
 public:
-    scopeNode(std::shared_ptr<iNode> right, std::shared_ptr<iNode> left) noexcept: 
-        iNode(right, left) {}
+    scopeNode(std::unique_ptr<iNode> right, std::unique_ptr<iNode> left) noexcept: 
+        iNode(std::move(right), std::move(left)) {}
     
     int eval(Visitor& visitor) const override;
 
@@ -103,11 +103,11 @@ public:
 };
 
 class ifNode: public iNode {
-   std::shared_ptr<iNode> expr_ = nullptr; 
+   std::unique_ptr<iNode> expr_ = nullptr; 
 public:
-    ifNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt): 
-        iNode(if_stmt, else_stmt), 
-        expr_(expr){}
+    ifNode(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> if_stmt, std::unique_ptr<iNode> else_stmt) noexcept: 
+        iNode(std::move(if_stmt), std::move(else_stmt)), 
+        expr_(std::move(expr)){}
 
     friend evalVisitor;
 
@@ -121,8 +121,8 @@ public:
 
 class whileNode: public iNode {
 public:
-    whileNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> stmt): 
-        iNode(expr, stmt) {}
+    whileNode(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> stmt) noexcept: 
+        iNode(std::move(expr), std::move(stmt)) {}
 
     int eval(Visitor& visitor) const override;
 
@@ -133,9 +133,8 @@ public:
 
 class notNode: public iNode {
 public:
-    notNode() = default;
-    notNode(std::shared_ptr<iNode> left): 
-        iNode(left, nullptr) {}
+    notNode(std::unique_ptr<iNode> left) noexcept: 
+        iNode(std::move(left), nullptr) {}
 
     int eval(Visitor& visitor) const override;
 
@@ -146,9 +145,8 @@ public:
 
 class minusNode: public iNode {
 public:
-    minusNode() = default;
-    minusNode(std::shared_ptr<iNode> left): 
-        iNode(left, nullptr) {}
+    minusNode(std::unique_ptr<iNode> left) noexcept: 
+        iNode(std::move(left), nullptr) {}
 
     int eval(Visitor&) const override;
 
@@ -163,18 +161,23 @@ class arithNode: public iNode {
         {arith_t::PLUS,  {[](int lhs, int rhs) {return lhs + rhs;}}},
         {arith_t::MINUS, {[](int lhs, int rhs) {return lhs - rhs;}}},
         {arith_t::MULT,  {[](int lhs, int rhs) {return lhs * rhs;}}},
-        {arith_t::DIV,   {[](int lhs, int rhs) {return lhs / rhs;}}},
+        {arith_t::DIV,   {[](int lhs, int rhs) {
+            if (rhs == 0) {
+                throw std::runtime_error("Division by zero"); 
+            }
+                return lhs / rhs;}}
+        }
     };
     inline static const std::unordered_map<arith_t, std::function<void()>> dumped_arith_ = {
         {arith_t::PLUS,  {[]() {std::cout << "+" << std::endl;}}},
         {arith_t::MINUS, {[]() {std::cout << "-" << std::endl;}}},
         {arith_t::MULT,  {[]() {std::cout << "*" << std::endl;}}},
-        {arith_t::DIV,   {[]() {std::cout << "/" << std::endl;}}},
+        {arith_t::DIV,   {[]() {std::cout << "/" << std::endl;}}}
     };
 public:
-    arithNode(arith_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right): 
+    arithNode(arith_t op, std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) noexcept: 
         op_(op), 
-        iNode(left, right) {}
+        iNode(std::move(left), std::move(right)) {}
 
     friend evalVisitor;
 
@@ -209,9 +212,9 @@ class predNode: public iNode {
         {pred_t::OR,  {[]() {std::cout << "||" << std::endl;}}}
     };
 public:
-    predNode(pred_t op, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) noexcept: 
+    predNode(pred_t op, std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) noexcept: 
         op_(op), 
-        iNode(left, right) {}
+        iNode(std::move(left), std::move(right)) {}
 
     friend evalVisitor;
 
@@ -226,7 +229,7 @@ public:
 class numNode: public iNode { 
     int value_ = 0;
 public:
-    explicit numNode(int value): 
+    explicit numNode(int value) noexcept: 
         iNode(), value_(value){}
 
     friend evalVisitor;
@@ -261,7 +264,7 @@ public:
 
 class inputNode: public iNode {
 public:
-    inputNode(): iNode(){}
+    inputNode() noexcept: iNode(){}
 
     int eval(Visitor&) const override;
 
@@ -273,7 +276,7 @@ public:
 class outputNode: public iNode {
     std::string id_;
 public:
-    outputNode(std::string& id): 
+    outputNode(std::string& id) noexcept: 
         iNode(), 
         id_(id){}
 
@@ -288,8 +291,8 @@ public:
 
 class assignNode: public iNode { 
 public:
-    explicit assignNode(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> var): 
-        iNode(expr, var) {}
+    explicit assignNode(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> var) noexcept: 
+        iNode(std::move(expr), std::move(var)) {}
 
     int eval(Visitor&) const override;
 
@@ -298,51 +301,51 @@ public:
     }
 };
 
-inline std::shared_ptr<iNode> newScope(std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {
-    return std::make_shared<scopeNode>(left, right);
+inline std::unique_ptr<iNode> newScope(std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) {
+    return std::make_unique<scopeNode>(std::move(left), std::move(right));
 }
 
-inline std::shared_ptr<iNode> newIf(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> if_stmt, std::shared_ptr<iNode> else_stmt) {
-    return std::make_shared<ifNode>(expr, if_stmt, else_stmt);
+inline std::unique_ptr<iNode> newIf(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> if_stmt, std::unique_ptr<iNode> else_stmt) {
+    return std::make_unique<ifNode>(std::move(expr), std::move(if_stmt), std::move(else_stmt));
 }
 
-inline std::shared_ptr<iNode> newWhile(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> stmt) {
-    return std::make_shared<whileNode>(expr, stmt);
+inline std::unique_ptr<iNode> newWhile(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> stmt) {
+    return std::make_unique<whileNode>(std::move(expr), std::move(stmt));
 }
 
-inline std::shared_ptr<iNode> newNot(std::shared_ptr<iNode> expr) {
-    return std::make_shared<notNode>(expr);
+inline std::unique_ptr<iNode> newNot(std::unique_ptr<iNode> expr) {
+    return std::make_unique<notNode>(std::move(expr));
 }
 
-inline std::shared_ptr<iNode> newMinus(std::shared_ptr<iNode> expr) {
-    return std::make_shared<minusNode>(expr);
+inline std::unique_ptr<iNode> newMinus(std::unique_ptr<iNode> expr) {
+    return std::make_unique<minusNode>(std::move(expr));
 }
 
-inline std::shared_ptr<iNode> newArith(arith_t type, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {
-    return std::make_shared<arithNode>(type, left, right);
+inline std::unique_ptr<iNode> newArith(arith_t type, std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) {
+    return std::make_unique<arithNode>(type, std::move(left), std::move(right));
 }
 
-inline std::shared_ptr<iNode> newPred(pred_t type, std::shared_ptr<iNode> left, std::shared_ptr<iNode> right) {
-    return std::make_shared<predNode>(type, left, right);
+inline std::unique_ptr<iNode> newPred(pred_t type, std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) {
+    return std::make_unique<predNode>(type, std::move(left), std::move(right));
 }
 
-inline std::shared_ptr<iNode> newNumber(int value) {
-    return std::make_shared<numNode>(value);
+inline std::unique_ptr<iNode> newNumber(int value) {
+    return std::make_unique<numNode>(value);
 }
 
-inline std::shared_ptr<iNode> newInput() {
-    return std::make_shared<inputNode>();
+inline std::unique_ptr<iNode> newInput() {
+    return std::make_unique<inputNode>();
 }
 
-inline std::shared_ptr<iNode> newOutput(std::string& id) {
-    return std::make_shared<outputNode>(id);
+inline std::unique_ptr<iNode> newOutput(std::string& id) {
+    return std::make_unique<outputNode>(id);
 }
 
-inline std::shared_ptr<iNode> newVar(std::string& id) {
-    return std::make_shared<varNode>(id);
+inline std::unique_ptr<iNode> newVar(std::string& id) {
+    return std::make_unique<varNode>(id);
 }
 
-inline std::shared_ptr<iNode> newAssign(std::shared_ptr<iNode> expr, std::shared_ptr<iNode> var) {
-    return std::make_shared<assignNode>(expr, var);
+inline std::unique_ptr<iNode> newAssign(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> var) {
+    return std::make_unique<assignNode>(std::move(expr), std::move(var));
 }
 
