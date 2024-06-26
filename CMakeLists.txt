@@ -16,7 +16,7 @@ find_package(FLEX REQUIRED)
 
 option(DEBUG_GRAMMAR "Debug" ON)
 
-set(GRAMMAR "grammar-sr.y" CACHE STRING "file with grammar" FORCE)
+set(GRAMMAR "grammar.y" CACHE STRING "file with grammar" FORCE)
 # set(GRAMMAR "grammar_small.y" CACHE STRING "file with grammar" FORCE)
 
 if(DEBUG_GRAMMAR)
@@ -27,7 +27,7 @@ else()
 endif(DEBUG_GRAMMAR)
 
 flex_target(scanner
-  lex.l
+  lexer.l
   ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp
 )
 

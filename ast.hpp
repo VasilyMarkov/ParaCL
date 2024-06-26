@@ -13,6 +13,8 @@ inline void print(const std::unordered_map<std::string, int>& cont) {
     }
 }
 
+namespace ast {
+
 inline std::unordered_map<std::string, int> var_store; //global variables
 
 enum class arith_t{
@@ -349,3 +351,4 @@ inline std::unique_ptr<iNode> newAssign(std::unique_ptr<iNode> expr, std::unique
     return std::make_unique<assignNode>(std::move(expr), std::move(var));
 }
 
+}

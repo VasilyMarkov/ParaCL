@@ -4,7 +4,6 @@
 #include "driver.hpp"
 #include <exception>
 
-// int yyFlexLexer::yywrap() { return 1; }
 using namespace yy;
 
 int main(int argc, char *argv[]) {
@@ -19,10 +18,9 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
   try {
-    yy::Driver driver(file);
+    Driver driver(file);
     driver.parse();
-    driver.eval();
-    print(var_store);
+    print(ast::var_store);
   } 
   catch(std::exception& exp) {
     std::cout << exp.what() << std::endl;

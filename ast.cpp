@@ -1,5 +1,5 @@
 #include "ast.hpp"
-
+namespace ast {
 int evalVisitor::visit(const scopeNode& node) 
 {
     node.left_->eval(*this);
@@ -76,8 +76,10 @@ int evalVisitor::visit(const inputNode& node)
 
 int evalVisitor::visit(const outputNode& node)
 {
+    if (!var_store.contains(node.id_)) {
+        throw std::runtime_error("The variable name doesn't exist.");
+    }
     std::cout << node.id_ << " = " << var_store.at(node.id_) << std::endl;
-
     return 0;
 }
 
@@ -147,4 +149,5 @@ int outputNode::eval(Visitor& visitor) const
 int assignNode::eval(Visitor& visitor) const
 {
     return visitor.visit(*this);
+}
 }
