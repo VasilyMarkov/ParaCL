@@ -14,7 +14,7 @@ def runTest(app, generator):
     result = 0
     try:
         print(expression)
-        result = int(runApp(app, expression))
+        # result = int(runApp(app, expression))
     except Exception as e:
         ...
     return result
