@@ -9,13 +9,13 @@ int evalVisitor::visit(const scopeNode& node)
     return 0;
 }
 
-int evalVisitor::visit(const ifNode& node)
+int EvalVisitor::visit(const ifNode& node)
 {
     if (node.expr_ != nullptr) {
-        if (node.expr_->eval(*this) && node.left_ != nullptr) {
+        if (node.left_ != nullptr && node.expr_->eval(*this)) {
             node.left_->eval(*this);
         }
-        else if (!node.expr_->eval(*this) && node.right_ != nullptr) {
+        else if (node.right_ != nullptr && !node.expr_->eval(*this)) {
             node.right_->eval(*this);
         }
     }
