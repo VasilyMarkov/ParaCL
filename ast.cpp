@@ -1,4 +1,6 @@
 #include "ast.hpp"
+#include <sstream>
+#include <string>
 
 namespace ast {
 
@@ -66,7 +68,9 @@ int EvalVisitor::visit(const numNode& node)
 int EvalVisitor::visit(const varNode& node)
 {
     if (!global_store_.contains(node.id_)) {
-        throw std::runtime_error("The variable doesn't exist.");
+        std::stringstream ss;
+        ss << "The variable: " << node.id_ << " doesn't exist.";
+        throw std::runtime_error(ss.str());
     }
     return global_store_.at(node.id_);
 }
@@ -81,7 +85,9 @@ int EvalVisitor::visit(const inputNode& node)
 int EvalVisitor::visit(const outputNode& node)
 {
     if (!global_store_.contains(node.id_)) {
-        throw std::runtime_error("The variable doesn't exist.");
+        std::stringstream ss;
+        ss << "The variable: " << node.id_ << " doesn't exist.";
+        throw std::runtime_error(ss.str());
     }
     std::cout << node.id_ << " = " << global_store_.at(node.id_) << std::endl;
     return 0;
