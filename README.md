@@ -1,11 +1,6 @@
 # ParaCL
 A pet-project for the development of a programming language
 
-## Install
-```bash
-$ git clone --single-branch --branch Vasily git@github.com:Waloid24/ParaCL.git
-```
-
 ## Build
 ### Manual Build
 ```bash
