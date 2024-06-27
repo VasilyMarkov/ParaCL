@@ -16,10 +16,10 @@ find_package(FLEX REQUIRED)
 
 option(DEBUG_GRAMMAR "Debug" OFF)
 
-set(GRAMMAR "grammar.y" CACHE STRING "file with grammar" FORCE)
+set(GRAMMAR "lang/grammar.y" CACHE STRING "file with grammar" FORCE)
 
 flex_target(scanner
-  lexer.l
+  lang/lexer.l
   ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp
 )
 
@@ -35,9 +35,11 @@ add_compile_options(${CMAKE_CXX_FLAGS_RELEASE})
 message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 message("CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS_RELEASE}")
 
+
+
 add_executable(${PROJECT_NAME} 
-  main.cpp  
-  ast.cpp  
+  app/main.cpp  
+  ast/ast.cpp  
   ${BISON_parser_OUTPUTS}
   ${FLEX_scanner_OUTPUTS}
 )
@@ -45,3 +47,4 @@ add_executable(${PROJECT_NAME}
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ast app)
