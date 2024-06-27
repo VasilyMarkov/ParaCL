@@ -1,0 +1,13 @@
+a = 1;
+b = 0;
+c = 1;
+d = 0;
+bool_exp1 = !(a && b);
+bool_exp2 = a || b;
+bool_exp3 = d || (b && c);
+bool_exp4 = !(d || (b && c));
+
+print bool_exp1;
+print bool_exp2;
+print bool_exp3;
+print bool_exp4;

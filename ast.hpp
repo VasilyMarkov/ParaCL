@@ -54,8 +54,26 @@ public:
     virtual ~Visitor() {}
 };
 
-class evalVisitor: public Visitor {
+class EvalVisitor: public Visitor {
 public:
+    int visit(const class scopeNode&)  override;
+    int visit(const class whileNode&)  override;
+    int visit(const class notNode&)    override;
+    int visit(const class minusNode&)  override;
+    int visit(const class arithNode&)  override;
+    int visit(const class ifNode&)     override;
+    int visit(const class predNode&)   override;
+    int visit(const class numNode&)    override;
+    int visit(const class varNode&)    override;
+    int visit(const class inputNode&)  override;
+    int visit(const class outputNode&) override;
+    int visit(const class assignNode&) override;
+};
+
+class DumpVisitor: public Visitor {
+    int indent_ = 0;
+public:
+    explicit DumpVisitor(int indent = 0): indent_(indent) {}
     int visit(const class scopeNode&)  override;
     int visit(const class whileNode&)  override;
     int visit(const class notNode&)    override;
@@ -84,7 +102,8 @@ public:
 
     virtual int eval(Visitor&) const = 0;
 
-    friend evalVisitor;
+    friend EvalVisitor;
+    friend DumpVisitor;
 };
 
 class scopeNode: public iNode {
@@ -102,8 +121,8 @@ public:
         iNode(std::move(if_stmt), std::move(else_stmt)), 
         expr_(std::move(expr)){}
 
-    friend evalVisitor;
-
+    friend EvalVisitor;
+    friend DumpVisitor;
     int eval(Visitor& visitor) const override;
 };
 
@@ -155,7 +174,8 @@ public:
         op_(op), 
         iNode(std::move(left), std::move(right)) {}
 
-    friend evalVisitor;
+    friend EvalVisitor;
+    friend DumpVisitor;
 
     int eval(Visitor&) const override;
 };
@@ -187,8 +207,8 @@ public:
         op_(op), 
         iNode(std::move(left), std::move(right)) {}
 
-    friend evalVisitor;
-
+    friend EvalVisitor;
+    friend DumpVisitor;
     int eval(Visitor&) const override;
 };
 
@@ -198,8 +218,8 @@ public:
     explicit numNode(int value) noexcept: 
         iNode(), value_(value) {}
 
-    friend evalVisitor;
-
+    friend EvalVisitor;
+    friend DumpVisitor;
     int eval(Visitor&) const override;
 };
 
@@ -210,8 +230,8 @@ public:
         id_(id), 
         iNode()  {}
 
-    friend evalVisitor;
-
+    friend EvalVisitor;
+    friend DumpVisitor;
     std::string name() const {return id_;}    
 
     int eval(Visitor&) const override;
@@ -231,8 +251,8 @@ public:
         iNode(), 
         id_(id){}
 
-    friend evalVisitor;
-
+    friend EvalVisitor;
+    friend DumpVisitor;
     int eval(Visitor&) const override;
 };
 

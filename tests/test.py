@@ -1,8 +1,9 @@
 from subprocess import Popen, PIPE, STDOUT
+import subprocess
+from generators import *
+from pathlib import Path
 from os import listdir
 from os.path import isfile, join
-import numpy as np
-from generators import *
 
 def runApp(app, input_data):
     pipe = Popen([app], stdout=PIPE, stdin=PIPE)
@@ -14,7 +15,7 @@ def runTest(app, generator):
     result = 0
     try:
         print(expression)
-        # result = int(runApp(app, expression))
+        result = int(runApp(app, expression))
     except Exception as e:
         ...
     return result
@@ -26,5 +27,13 @@ def end_to_end(app):
         print(f'Result: {result}')
     print("Tests finished.")
 
+
+def get_file_list(path):
+    file_list = [f for f in listdir(path) if isfile(join(path, f))]
+    return file_list
+
+files = get_file_list(str(Path.cwd()) + "/tests/data/")
+
 app = "./paracl"
-end_to_end(app)
+file = "../tests/data/"+files[1]
+print(runApp(app, file))

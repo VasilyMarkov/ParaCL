@@ -36,7 +36,8 @@ public:
 class Driver {
   std::unique_ptr<Lexer> lexer_ = nullptr;
   std::unique_ptr<ast::iNode> ast_ = nullptr;
-  evalVisitor evaluator_;
+  EvalVisitor evaluator_;
+  DumpVisitor dumper_;
 public:
   Driver(std::ifstream& file): lexer_(std::make_unique<Lexer>()) {
     lexer_->switch_streams(file, std::cout);
@@ -82,7 +83,10 @@ public:
   bool parse() {
     parser parser(this);
     bool res = parser.parse();
-    if (!res) ast_->eval(evaluator_);
+    if (!res) { 
+      ast_->eval(evaluator_);
+      // ast_->eval(dumper_);
+    }
     return !res;
   }
 

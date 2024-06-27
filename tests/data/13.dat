@@ -1,0 +1,16 @@
+a = ?;
+b = 2;
+c = a-b;
+d = 7;
+if (c >= 3) {
+    d = -d;
+}
+else {
+    while(d != 0) {
+        d = d-1;
+        print d;
+    }
+}
+print a;
+print b;
+print c;
