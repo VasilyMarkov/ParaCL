@@ -85,7 +85,6 @@ public:
     bool res = parser.parse();
     if (!res) { 
       ast_->eval(evaluator_);
-      // ast_->eval(dumper_);
     }
     return !res;
   }
