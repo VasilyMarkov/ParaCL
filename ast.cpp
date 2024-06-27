@@ -1,5 +1,7 @@
 #include "ast.hpp"
+
 namespace ast {
+
 int evalVisitor::visit(const scopeNode& node) 
 {
     node.left_->eval(*this);
@@ -63,7 +65,10 @@ int evalVisitor::visit(const numNode& node)
 
 int evalVisitor::visit(const varNode& node)
 {
-    return var_store.at(node.id_);
+    if (!global_store_.contains(node.id_)) {
+        throw std::runtime_error("The variable doesn't exist.");
+    }
+    return global_store_.at(node.id_);
 }
 
 int evalVisitor::visit(const inputNode& node)
@@ -76,17 +81,22 @@ int evalVisitor::visit(const inputNode& node)
 
 int evalVisitor::visit(const outputNode& node)
 {
-    if (!var_store.contains(node.id_)) {
-        throw std::runtime_error("The variable name doesn't exist.");
+    if (!global_store_.contains(node.id_)) {
+        throw std::runtime_error("The variable doesn't exist.");
     }
-    std::cout << node.id_ << " = " << var_store.at(node.id_) << std::endl;
+    std::cout << node.id_ << " = " << global_store_.at(node.id_) << std::endl;
     return 0;
 }
 
 int evalVisitor::visit(const assignNode& node)
 {
     if (auto var = dynamic_cast<varNode*>(node.left_.get())) {
-        var_store.at(var->name()) = node.right_->eval(*this);
+        if (global_store_.contains(var->name())) {
+            global_store_.at(var->name()) = node.right_->eval(*this);
+        }
+        else {
+            global_store_.emplace(var->name(), node.right_->eval(*this));
+        }
     }
     return 0;
 }
@@ -150,4 +160,5 @@ int assignNode::eval(Visitor& visitor) const
 {
     return visitor.visit(*this);
 }
+
 }

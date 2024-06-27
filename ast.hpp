@@ -15,8 +15,6 @@ inline void print(const std::unordered_map<std::string, int>& cont) {
 
 namespace ast {
 
-inline std::unordered_map<std::string, int> var_store; //global variables
-
 enum class arith_t{
     PLUS,
     MINUS,
@@ -35,7 +33,11 @@ enum class pred_t{
     OR
 };
 
+using var_store_t = std::unordered_map<std::string, int>;
+
 class Visitor {
+protected:
+    inline static var_store_t global_store_;
 public:
     virtual int visit(const class scopeNode&)  = 0;
     virtual int visit(const class ifNode&)     = 0;
@@ -81,15 +83,8 @@ public:
     virtual ~iNode() = default;
 
     virtual int eval(Visitor&) const = 0;
-    virtual void dump(int indent = 0) const = 0;
-    friend evalVisitor;
-    // friend void dumpTree(std::unique_ptr<iNode> node, int indent = 0) {
-    //     if (node == nullptr) return;   
-    //     dumpTree(node->left_, indent + 4);
-    //     node->dump(indent);
-    //     dumpTree(node->right_, indent + 4);
-    // }
 
+    friend evalVisitor;
 };
 
 class scopeNode: public iNode {
@@ -98,10 +93,6 @@ public:
         iNode(std::move(right), std::move(left)) {}
     
     int eval(Visitor& visitor) const override;
-
-    void dump(int indent = 0) const override {
-
-    }
 };
 
 class ifNode: public iNode {
@@ -114,11 +105,6 @@ public:
     friend evalVisitor;
 
     int eval(Visitor& visitor) const override;
-
-    void dump(int indent = 0) const override {
-
-    }
-    
 };
 
 class whileNode: public iNode {
@@ -127,10 +113,6 @@ public:
         iNode(std::move(expr), std::move(stmt)) {}
 
     int eval(Visitor& visitor) const override;
-
-    void dump(int indent = 0) const override {
-
-    }
 };
 
 class notNode: public iNode {
@@ -139,10 +121,6 @@ public:
         iNode(std::move(left), nullptr) {}
 
     int eval(Visitor& visitor) const override;
-
-    void dump(int indent = 0) const override {
-
-    }
 };
 
 class minusNode: public iNode {
@@ -151,10 +129,6 @@ public:
         iNode(std::move(left), nullptr) {}
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-
-    }
 };
 
 class arithNode: public iNode { 
@@ -184,11 +158,6 @@ public:
     friend evalVisitor;
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        std::cout << std::string(indent, ' ') << "OP: ";
-        dumped_arith_.at(op_)();
-    }
 };
 
 class predNode: public iNode { 
@@ -221,26 +190,17 @@ public:
     friend evalVisitor;
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        std::cout << std::string(indent, ' ') << "OP: ";
-        dumped_pred_.at(op_)();
-    }
 };
 
 class numNode: public iNode { 
     int value_ = 0;
 public:
     explicit numNode(int value) noexcept: 
-        iNode(), value_(value){}
+        iNode(), value_(value) {}
 
     friend evalVisitor;
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        std::cout << std::string(indent, ' ') << "Num: " << value_ << std::endl;
-    }
 };
 
 class varNode: public iNode { 
@@ -248,20 +208,13 @@ class varNode: public iNode {
 public:
     explicit varNode(const std::string& id): 
         id_(id), 
-        iNode() 
-    {
-        var_store.emplace(id_, 0);
-    }
+        iNode()  {}
 
     friend evalVisitor;
 
     std::string name() const {return id_;}    
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        std::cout << std::string(indent, ' ') << "Var: " << id_ << std::endl;
-    }
 };
 
 class inputNode: public iNode {
@@ -269,26 +222,18 @@ public:
     inputNode() noexcept: iNode(){}
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        
-    }
 };
 
 class outputNode: public iNode {
     std::string id_;
 public:
-    outputNode(std::string& id) noexcept: 
+    explicit outputNode(std::string& id) noexcept: 
         iNode(), 
         id_(id){}
 
     friend evalVisitor;
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        
-    }
 };
 
 class assignNode: public iNode { 
@@ -297,10 +242,6 @@ public:
         iNode(std::move(expr), std::move(var)) {}
 
     int eval(Visitor&) const override;
-
-    void dump(int indent = 0) const override {
-        std::cout << std::string(indent, ' ') << "=" << std::endl;
-    }
 };
 
 inline std::unique_ptr<iNode> newScope(std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) {

@@ -36,7 +36,7 @@ public:
 class Driver {
   std::unique_ptr<Lexer> lexer_ = nullptr;
   std::unique_ptr<ast::iNode> ast_ = nullptr;
-  ast::evalVisitor evaluator_;
+  evalVisitor evaluator_;
 public:
   Driver(std::ifstream& file): lexer_(std::make_unique<Lexer>()) {
     lexer_->switch_streams(file, std::cout);

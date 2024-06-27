@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
   try {
     Driver driver(file);
     driver.parse();
-    print(ast::var_store);
   } 
   catch(std::exception& exp) {
     std::cout << exp.what() << std::endl;
