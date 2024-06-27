@@ -28,10 +28,6 @@ $ ./bld DEBUG_GRAMMAR
 ```bash
     $./paracl < expression_file.dat
 ```
-### Tests
-```bash
-    $./python3 tests/test.py
-```
 
 ## Example of Debug mode:
 #### Example 1:
