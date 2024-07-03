@@ -88,34 +88,34 @@ if_statement:   IF "(" expr ")" "{" statements "}" {$$ = newIf(std::move($3), st
 
 while_statement: WHILE "(" expr ")" "{" statements "}" {$$ = newWhile(std::move($3), std::move($6));}
 
-expr_statement: expr ";" {$$ = std::move($1);}   
+expr_statement: expr ";"              {$$ = std::move($1);}   
 
-expr:    term "+"  expr            {$$ = newArith(arith_t::PLUS, std::move($1), std::move($3));}
-      |  term "-"  expr            {$$ = newArith(arith_t::MINUS, std::move($1), std::move($3));}  
-      |  term ">"  expr            {$$ = newPred(pred_t::GR, std::move($1), std::move($3));}  
-      |  term ">=" expr            {$$ = newPred(pred_t::GRE, std::move($1), std::move($3));}  
-      |  term "<"  expr            {$$ = newPred(pred_t::LW, std::move($1), std::move($3));}  
-      |  term "<=" expr            {$$ = newPred(pred_t::LWE, std::move($1), std::move($3));}  
-      |  term "==" expr            {$$ = newPred(pred_t::EQ, std::move($1), std::move($3));}  
-      |  term "!=" expr            {$$ = newPred(pred_t::NEQ, std::move($1), std::move($3));}    
-      |  term "&&" expr            {$$ = newPred(pred_t::AND, std::move($1), std::move($3));}    
-      |  term "||" expr            {$$ = newPred(pred_t::OR, std::move($1), std::move($3));}    
-      |  term "="  expr            {$$ = newAssign(std::move($1), std::move($3));} 
-      |  "-" expr %prec UMINUS     {$$ = newMinus(std::move($2));} 
-      |  "!" expr %prec UNOT       {$$ = newNot(std::move($2));} 
-      |  "print" ID                {$$ = newOutput($2);} 
-      |  term                      {$$ = std::move($1);}       
+expr:    term "+"  expr               {$$ = newArith(arith_t::PLUS, std::move($1), std::move($3));}
+      |  term "-"  expr               {$$ = newArith(arith_t::MINUS, std::move($1), std::move($3));}  
+      |  term ">"  expr               {$$ = newPred(pred_t::GR, std::move($1), std::move($3));}  
+      |  term ">=" expr               {$$ = newPred(pred_t::GRE, std::move($1), std::move($3));}  
+      |  term "<"  expr               {$$ = newPred(pred_t::LW, std::move($1), std::move($3));}  
+      |  term "<=" expr               {$$ = newPred(pred_t::LWE, std::move($1), std::move($3));}  
+      |  term "==" expr               {$$ = newPred(pred_t::EQ, std::move($1), std::move($3));}  
+      |  term "!=" expr               {$$ = newPred(pred_t::NEQ, std::move($1), std::move($3));}    
+      |  term "&&" expr               {$$ = newPred(pred_t::AND, std::move($1), std::move($3));}    
+      |  term "||" expr               {$$ = newPred(pred_t::OR, std::move($1), std::move($3));}    
+      |  term "="  expr               {$$ = newAssign(std::move($1), std::move($3));} 
+      |  "print" expr                 {$$ = newOutput(std::move($2));} 
+      |  term                         {$$ = std::move($1);}       
 ;
 
-term :  term "*" factor              {$$ = newArith(arith_t::MULT, std::move($1), std::move($3));}   
-      | term "/" factor              {$$ = newArith(arith_t::DIV, std::move($1), std::move($3));}   
-      | factor                       {$$ = std::move($1);}
+term :  term "*" factor               {$$ = newArith(arith_t::MULT, std::move($1), std::move($3));}   
+      | term "/" factor               {$$ = newArith(arith_t::DIV, std::move($1), std::move($3));}   
+      | factor                        {$$ = std::move($1);}
 ;    
 
 factor :  NUMBER                      {$$ = newNumber($1);}
         | "(" expr ")"                {$$ = std::move($2);}
         | ID                          {$$ = newVar($1);}
         | "?"                         {$$ = newInput();}
+        | "-" factor %prec UMINUS     {$$ = newMinus(std::move($2));}
+        | "!" factor %prec UNOT       {$$ = newNot(std::move($2));}  
 ;  
 
 %%
