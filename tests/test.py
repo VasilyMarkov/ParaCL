@@ -62,7 +62,7 @@ for paracl, answer, in_file, out_file in zip(paracl_out, files_out, in_files, ou
         print(f'{GREEN}[         OK ]{RESET}' + f' {paracl} == {answer}')
     else:
         passed = False
-        print(f'{RED}[   FAILED   ]{RESET}' + f' {in_file}')
+        print(f'{RED}[   FAILED   ]{RESET}')
 
 if passed:
     print(f'{GREEN}[   PASSED   ]{RESET}')
