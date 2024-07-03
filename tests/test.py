@@ -59,7 +59,7 @@ passed = True
 for paracl, answer, in_file, out_file in zip(paracl_out, files_out, in_files, out_files):
     print(f'{GREEN}[ RUN        ]{RESET}' + f'{in_file}')
     if paracl == answer:
-        print(f'{GREEN}[         OK ]{RESET}' + f' + {paracl} == {answer}')
+        print(f'{GREEN}[         OK ]{RESET}' + f' {paracl} == {answer}')
     else:
         passed = False
         print(f'{RED}[   FAILED   ]{RESET}' + f' {in_file}')
