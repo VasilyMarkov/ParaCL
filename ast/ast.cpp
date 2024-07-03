@@ -84,12 +84,7 @@ int EvalVisitor::visit(const inputNode& node)
 
 int EvalVisitor::visit(const outputNode& node)
 {
-    if (!global_store_.contains(node.id_)) {
-        std::stringstream ss;
-        ss << "The variable: " << node.id_ << " doesn't exist.";
-        throw std::runtime_error(ss.str());
-    }
-    std::cout << node.id_ << " = " << global_store_.at(node.id_) << std::endl;
+    std::cout << node.left_->eval(*this) << std::endl;
     return 0;
 }
 

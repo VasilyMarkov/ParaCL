@@ -247,9 +247,8 @@ public:
 class outputNode: public iNode {
     std::string id_;
 public:
-    explicit outputNode(std::string& id) noexcept: 
-        iNode(), 
-        id_(id){}
+    explicit outputNode(std::unique_ptr<iNode> expr) noexcept: 
+        iNode(std::move(expr), nullptr) {}
 
     friend EvalVisitor;
     friend DumpVisitor;
@@ -300,8 +299,8 @@ inline std::unique_ptr<iNode> newInput() {
     return std::make_unique<inputNode>();
 }
 
-inline std::unique_ptr<iNode> newOutput(std::string& id) {
-    return std::make_unique<outputNode>(id);
+inline std::unique_ptr<iNode> newOutput(std::unique_ptr<iNode> expr) {
+    return std::make_unique<outputNode>(std::move(expr));
 }
 
 inline std::unique_ptr<iNode> newVar(std::string& id) {
