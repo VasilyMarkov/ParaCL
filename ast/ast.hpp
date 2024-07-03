@@ -39,53 +39,53 @@ class Visitor {
 protected:
     inline static var_store_t global_store_;
 public:
-    virtual int visit(const class scopeNode&)  = 0;
-    virtual int visit(const class ifNode&)     = 0;
-    virtual int visit(const class whileNode&)  = 0;
-    virtual int visit(const class notNode&)    = 0;
-    virtual int visit(const class minusNode&)  = 0;
-    virtual int visit(const class arithNode&)  = 0;
-    virtual int visit(const class predNode&)   = 0;
-    virtual int visit(const class numNode&)    = 0;
-    virtual int visit(const class varNode&)    = 0;
-    virtual int visit(const class inputNode&)  = 0;
-    virtual int visit(const class outputNode&) = 0;
-    virtual int visit(const class assignNode&) = 0;
+    virtual int visit(const class scopeNode&)  const  = 0;
+    virtual int visit(const class ifNode&)     const  = 0;
+    virtual int visit(const class whileNode&)  const  = 0;
+    virtual int visit(const class notNode&)    const  = 0;
+    virtual int visit(const class minusNode&)  const  = 0;
+    virtual int visit(const class arithNode&)  const  = 0;
+    virtual int visit(const class predNode&)   const  = 0;
+    virtual int visit(const class numNode&)    const  = 0;
+    virtual int visit(const class varNode&)    const  = 0;
+    virtual int visit(const class inputNode&)  const  = 0;
+    virtual int visit(const class outputNode&) const  = 0;
+    virtual int visit(const class assignNode&) const  = 0;
     virtual ~Visitor() {}
 };
 
 class EvalVisitor: public Visitor {
 public:
-    int visit(const class scopeNode&)  override;
-    int visit(const class whileNode&)  override;
-    int visit(const class notNode&)    override;
-    int visit(const class minusNode&)  override;
-    int visit(const class arithNode&)  override;
-    int visit(const class ifNode&)     override;
-    int visit(const class predNode&)   override;
-    int visit(const class numNode&)    override;
-    int visit(const class varNode&)    override;
-    int visit(const class inputNode&)  override;
-    int visit(const class outputNode&) override;
-    int visit(const class assignNode&) override;
+    int visit(const class scopeNode&)  const override;
+    int visit(const class whileNode&)  const override;
+    int visit(const class notNode&)    const override;
+    int visit(const class minusNode&)  const override;
+    int visit(const class arithNode&)  const override;
+    int visit(const class ifNode&)     const override;
+    int visit(const class predNode&)   const override;
+    int visit(const class numNode&)    const override;
+    int visit(const class varNode&)    const override;
+    int visit(const class inputNode&)  const override;
+    int visit(const class outputNode&) const override;
+    int visit(const class assignNode&) const override;
 };
 
 class DumpVisitor: public Visitor {
     int indent_ = 0;
 public:
     explicit DumpVisitor(int indent = 0): indent_(indent) {}
-    int visit(const class scopeNode&)  override;
-    int visit(const class whileNode&)  override;
-    int visit(const class notNode&)    override;
-    int visit(const class minusNode&)  override;
-    int visit(const class arithNode&)  override;
-    int visit(const class ifNode&)     override;
-    int visit(const class predNode&)   override;
-    int visit(const class numNode&)    override;
-    int visit(const class varNode&)    override;
-    int visit(const class inputNode&)  override;
-    int visit(const class outputNode&) override;
-    int visit(const class assignNode&) override;
+    int visit(const class scopeNode&)  const override;
+    int visit(const class whileNode&)  const override;
+    int visit(const class notNode&)    const override;
+    int visit(const class minusNode&)  const override;
+    int visit(const class arithNode&)  const override;
+    int visit(const class ifNode&)     const override;
+    int visit(const class predNode&)   const override;
+    int visit(const class numNode&)    const override;
+    int visit(const class varNode&)    const override;
+    int visit(const class inputNode&)  const override;
+    int visit(const class outputNode&) const override;
+    int visit(const class assignNode&) const override;
 };
 
 class iNode {    
@@ -100,7 +100,7 @@ public:
     
     virtual ~iNode() = default;
 
-    virtual int eval(Visitor&) const = 0;
+    virtual int eval(const Visitor&) const = 0;
 
     friend EvalVisitor;
     friend DumpVisitor;
@@ -111,7 +111,7 @@ public:
     scopeNode(std::unique_ptr<iNode> right, std::unique_ptr<iNode> left) noexcept: 
         iNode(std::move(right), std::move(left)) {}
     
-    int eval(Visitor& visitor) const override;
+    int eval(const Visitor& visitor) const override;
 };
 
 class ifNode: public iNode {
@@ -123,7 +123,7 @@ public:
 
     friend EvalVisitor;
     friend DumpVisitor;
-    int eval(Visitor& visitor) const override;
+    int eval(const Visitor& visitor) const override;
 };
 
 class whileNode: public iNode {
@@ -131,7 +131,7 @@ public:
     whileNode(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> stmt) noexcept: 
         iNode(std::move(expr), std::move(stmt)) {}
 
-    int eval(Visitor& visitor) const override;
+    int eval(const Visitor& visitor) const override;
 };
 
 class notNode: public iNode {
@@ -139,7 +139,7 @@ public:
     notNode(std::unique_ptr<iNode> left) noexcept: 
         iNode(std::move(left), nullptr) {}
 
-    int eval(Visitor& visitor) const override;
+    int eval(const Visitor& visitor) const override;
 };
 
 class minusNode: public iNode {
@@ -147,7 +147,7 @@ public:
     minusNode(std::unique_ptr<iNode> left) noexcept: 
         iNode(std::move(left), nullptr) {}
 
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class arithNode: public iNode { 
@@ -177,7 +177,7 @@ public:
     friend EvalVisitor;
     friend DumpVisitor;
 
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class predNode: public iNode { 
@@ -209,7 +209,7 @@ public:
 
     friend EvalVisitor;
     friend DumpVisitor;
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class numNode: public iNode { 
@@ -220,7 +220,7 @@ public:
 
     friend EvalVisitor;
     friend DumpVisitor;
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class varNode: public iNode { 
@@ -234,25 +234,22 @@ public:
     friend DumpVisitor;
     std::string name() const {return id_;}    
 
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class inputNode: public iNode {
 public:
     inputNode() noexcept: iNode(){}
 
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class outputNode: public iNode {
-    std::string id_;
 public:
     explicit outputNode(std::unique_ptr<iNode> expr) noexcept: 
         iNode(std::move(expr), nullptr) {}
 
-    friend EvalVisitor;
-    friend DumpVisitor;
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 class assignNode: public iNode { 
@@ -260,7 +257,7 @@ public:
     explicit assignNode(std::unique_ptr<iNode> expr, std::unique_ptr<iNode> var) noexcept: 
         iNode(std::move(expr), std::move(var)) {}
 
-    int eval(Visitor&) const override;
+    int eval(const Visitor&) const override;
 };
 
 inline std::unique_ptr<iNode> newScope(std::unique_ptr<iNode> left, std::unique_ptr<iNode> right) {
