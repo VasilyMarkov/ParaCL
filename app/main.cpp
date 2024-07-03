@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include "driver.hpp"
 #include <exception>
+#include "driver.hpp"
 
 using namespace yy;
 
