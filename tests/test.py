@@ -39,8 +39,7 @@ out_files = [str(Path.cwd()) + "/tests/data/" +filename for filename in files if
 app = "./paracl"
 
 paracl_out = [subprocess.run([app, file], capture_output=True, text=True).stdout for file in in_files]
-paracl_out = [i.replace('\n', ' ') for i in paracl_out]
-
+paracl_out = [i.replace('\n', '') for i in paracl_out]
 
 files_out = []
 for file in out_files:

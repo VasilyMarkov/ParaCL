@@ -84,7 +84,7 @@ int EvalVisitor::visit(const inputNode& node)
 
 int EvalVisitor::visit(const outputNode& node)
 {
-    std::cout << node.left_->eval(*this);
+    std::cout << node.left_->eval(*this) << std::endl;
     return 0;
 }
 
